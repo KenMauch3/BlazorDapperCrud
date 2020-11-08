@@ -1,0 +1,72 @@
+﻿@using BlazorDapperCrud.Data
+@page "/videodelete/{id:int}"
+@inject IVideoService VideoService
+@inject NavigationManager NavigationManager
+
+        <h1>Delete a Video</h1>
+<p style="color:red;text-align:center">Are you sure you want to permanetly delete this video? There is no undo!</p>
+    <table class="editform">
+        <tr>
+            <td>Video Title:</td>
+            <td>@video.Title</td>
+        </tr>
+        <tr>
+            <td>Date Published:</td>
+            <td>@video.DatePublished.ToShortDateString()</td>
+        </tr>
+        <tr>
+            <td>Is Active:</td>
+            <td>
+                @if (video.IsActive)
+                {
+                    <img src="../images/iGreenCheck.png" />
+                }
+                else
+                {
+                    <img src="../images/iRedX.png" />
+                }
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="text-align:center">
+                <input type="button" value="Delete" @onclick="@Delete"/>
+                <input type="button" value="Cancel" @onclick="@Cancel" />
+            </td>
+        </tr>
+    </table>
+
+@code {
+    //Create a new, empty Video object
+    Video video = new Video();
+
+    [Parameter]
+    public int id { get; set; }
+
+
+    // Executes on page open, set defaults on page.
+    protected override async Task OnInitializedAsync()
+    {
+        // passed in id is zero
+        if (id == 0)
+        {
+            video.DatePublished = DateTime.Now.Date;
+            video.IsActive = true;
+        }
+        else
+        {
+            video = await VideoService.Video_GetOne(id);
+        }
+        base.OnInitialized();
+
+    }
+
+    protected async Task Delete()
+    {
+        await VideoService.VideoDelete(video);
+        NavigationManager.NavigateTo("/videolist");
+    }
+    void Cancel()
+    {
+        NavigationManager.NavigateTo("/videolist");
+    }
+}
